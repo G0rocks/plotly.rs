@@ -1453,6 +1453,57 @@ impl Mapbox {
     }
 }
 
+#[derive(Serialize, Clone, Debug)]
+#[serde(rename_all = "kebab-case")]
+pub enum MapboxStyle {
+    #[serde(rename = "carto-darkmatter")]
+    CartoDarkMatter,
+    CartoPositron,
+    OpenStreetMap,
+    StamenTerrain,
+    StamenToner,
+    StamenWatercolor,
+    WhiteBg,
+    Basic,
+    Streets,
+    Outdoors,
+    Light,
+    Dark,
+    Satellite,
+    SatelliteStreets,
+}
+
+#[derive(Serialize, Clone, Debug, FieldSetter)]
+pub struct Geo {
+    /// Sets the geo access token to be used for this geo map. Note that
+    /// `access_token`s are only required when `style` (e.g with values: basic,
+    /// streets, outdoors, light, dark, satellite, satellite-streets)
+    /// and/or a layout layer references the Mapbox server.
+    #[serde(rename = "accesstoken")]
+    access_token: Option<String>,
+    /// Sets the bearing angle of the map in degrees counter-clockwise from
+    /// North.
+    bearing: Option<f64>,
+    /// Sets the latitude and longitude of the center of the map.
+    center: Option<Center>,
+    /// Sets the domain within which the mapbox will be drawn.
+    domain: Option<Domain>,
+    /// Sets the pitch angle of the map in degrees, where `0` means
+    /// perpendicular to the surface of the map.
+    pitch: Option<f64>,
+    /// Sets the style of the map.
+    style: Option<MapboxStyle>,
+    /// Sets the zoom level of the map.
+    zoom: Option<u8>,
+}
+
+impl Geo {
+    pub fn new() -> Self {
+        Default::default()
+    }
+}
+
+
 #[derive(Serialize, Debug, Clone)]
 /// If "cube", this scene's axes are drawn as a cube, regardless of the axes'
 /// ranges. If "data", this scene's axes are drawn in proportion with the axes'
