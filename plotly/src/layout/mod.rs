@@ -1453,48 +1453,33 @@ impl Mapbox {
     }
 }
 
-#[derive(Serialize, Clone, Debug)]
-#[serde(rename_all = "kebab-case")]
-pub enum MapboxStyle {
-    #[serde(rename = "carto-darkmatter")]
-    CartoDarkMatter,
-    CartoPositron,
-    OpenStreetMap,
-    StamenTerrain,
-    StamenToner,
-    StamenWatercolor,
-    WhiteBg,
-    Basic,
-    Streets,
-    Outdoors,
-    Light,
-    Dark,
-    Satellite,
-    SatelliteStreets,
-}
-
 #[derive(Serialize, Clone, Debug, FieldSetter)]
 pub struct Geo {
-    /// Sets the geo access token to be used for this geo map. Note that
-    /// `access_token`s are only required when `style` (e.g with values: basic,
-    /// streets, outdoors, light, dark, satellite, satellite-streets)
-    /// and/or a layout layer references the Mapbox server.
-    #[serde(rename = "accesstoken")]
-    access_token: Option<String>,
-    /// Sets the bearing angle of the map in degrees counter-clockwise from
-    /// North.
-    bearing: Option<f64>,
-    /// Sets the latitude and longitude of the center of the map.
-    center: Option<Center>,
-    /// Sets the domain within which the mapbox will be drawn.
-    domain: Option<Domain>,
-    /// Sets the pitch angle of the map in degrees, where `0` means
-    /// perpendicular to the surface of the map.
-    pitch: Option<f64>,
-    /// Sets the style of the map.
-    style: Option<MapboxStyle>,
     /// Sets the zoom level of the map.
     zoom: Option<u8>,
+    /// Sets the projection of the map
+    #[field_setter(default = "Projection::new().projection_type(ProjectionType::Orthographic)")]
+    projection: Option<Projection>,
+    /// If to show the ocean or not
+    #[field_setter(default = "Some(true)")]
+    showocean: Option<bool>,
+    /// Sets the color of the ocean
+    #[field_setter(default = "'rgb(0, 255, 255)'")]
+    oceancolor: Option<Box<dyn Color>>,
+    /// If to show the land or not
+    showland: Option<bool>,
+    /// Sets the color of the land
+    landcolor: Option<Box<dyn Color>>,
+    /// If to show lakes or not
+    showlakes: Option<bool>,
+    /// Sets the color of the lakes
+    lakecolor: Option<Box<dyn Color>>,
+    /// If to show countries (borders) or not
+    showcountries: Option<bool>,
+    /// Configures the longitude axis
+    lonaxis: Option<Axis>,
+    /// Configures the latitude axis
+    lataxis: Option<Axis>,
 }
 
 impl Geo {
@@ -1600,10 +1585,21 @@ pub enum ProjectionType {
     Orthographic,
 }
 
+/// Defines the rotation of the projection in degrees.
+/// The rotation is defined by the longitude and latitude
+/// of the center of the projection.
+/// https://plotly.com/javascript/lines-on-maps/
+#[derive(Serialize, Debug, Clone)]
+pub struct ProjectionRotation {
+    lon: f64,
+    lat: f64,
+}
+
 impl From<ProjectionType> for Projection {
     fn from(projection_type: ProjectionType) -> Self {
         Projection {
             projection_type: Some(projection_type),
+            rotation: None,
         }
     }
 }
@@ -1614,6 +1610,7 @@ impl From<ProjectionType> for Projection {
 pub struct Projection {
     #[serde(rename = "type")]
     projection_type: Option<ProjectionType>,
+    rotation: Option<ProjectionRotation>,
 }
 
 impl Projection {
